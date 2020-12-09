@@ -17,59 +17,81 @@ connection.connect(function (err) {
 
 
 function start() {
-  inquirer
-    .prompt({
-      name: "tracker",
-      type: "list",
-      message: "what would you like to do?",
-      choices: [
-        "Add department",
-        "Add role",
-        "Add employee",
-        "View departments",
-        "View roles",
-        "View employees",
-        "Update departments",
-        "Update roles",
-        "Update employees",
-        "Exit"
-      ]
-    })
-    .then(function (answer) {
-      // when finished prompting, insert a new item into the db with that info
-      switch (answer.tracker) {
-        case "Add department":
-          addDepartment()
-          break;
-        case "Add role":
-          addRole();
-          break;
-        case "Add employee":
-          addEmployee();
-          break;
-        case "View departments":
-          viewDepartment()
-          break;
-        case "View roles":
-          viewRole();
-          break;
-        case "View employees":
-          viewEmployee();
-          break;
-        case "Update departments":
-          updateDepartment()
-          break;
-        case "Update roles":
-          updateRole();
-          break;
-        case "Update employees":
-          updateEmployee();
-          break;
-        case "Exit":
-          start();
-          break;
-      }
-    });
+  var companyList = `
+    select 
+    employee.id as 'Employee ID',
+    employee.first_name as 'First Name',
+    employee.last_name as 'Last Name',
+    role.title as 'Job Title',
+    role.salary as 'Salary',
+    department.name as 'Department',
+    CONCAT(manager.first_name,' ',manager.last_name) as 'Manager'
+    from employee
+    join role on role.id = employee.role_id
+    left join employee manager on manager.id = employee.manager_id 
+    join department on role.department_id = department.id
+  `
+  connection.query(companyList, function (err, result) {
+    if (err) {
+      throw err;
+    }
+    console.table(result)
+    inquirer
+      .prompt({
+        name: "tracker",
+        type: "list",
+        message: "what would you like to do?",
+        choices: [
+          "Add department",
+          "Add role",
+          "Add employee",
+          "View departments",
+          "View roles",
+          "View employees",
+          "Update departments",
+          "Update roles",
+          "Update employees",
+          "Exit"
+        ]
+      })
+      .then(function (answer) {
+        // when finished prompting, insert a new item into the db with that info
+        switch (answer.tracker) {
+          case "Add department":
+            addDepartment()
+            break;
+          case "Add role":
+            addRole();
+            break;
+          case "Add employee":
+            addEmployee();
+            break;
+          case "View departments":
+            viewDepartment()
+            break;
+          case "View roles":
+            viewRole();
+            break;
+          case "View employees":
+            viewEmployee();
+            break;
+          case "Update departments":
+            updateDepartment()
+            break;
+          case "Update roles":
+            updateRole();
+            break;
+          case "Update employees":
+            updateEmployee();
+            break;
+          case "Exit":
+            start();
+            break;
+        }
+      });
+  })
+
+
 }
 
 function addDepartment() {
